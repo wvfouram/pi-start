@@ -2179,6 +2179,10 @@ class StartWindow(Gtk.Window):
                 _sh([exe])
 
     def open_settings(self):
+        if shutil.which("pi-settings"):
+            self.hide_menu()
+            _sh(["pi-settings"])
+            return
         a = self.db.find_exe(["rpcc", "rc_gui", "pipanel", "lxappearance"])
         if a:
             self.launch(a)
@@ -2240,6 +2244,8 @@ class StartWindow(Gtk.Window):
 
     def show_menu(self):
         self.close_fly()
+        # pick up changes made in Settings > Personalization > Start
+        self.st = self.app.settings = JsonSettings("pi-start", DEFAULTS)
         self.at_bottom = panel_position() == "bottom"
         self._place()
         self.page = 0
@@ -2271,6 +2277,9 @@ class StartWindow(Gtk.Window):
     def _sink_press(self, w, ev):
         if self.close_fly():
             return True
+        # clicks inside a child that has its own window (lists, expanders) are inside the panel
+        if ev.window != self.get_window():
+            return False
         a = self.menu.get_allocation()
         if not (a.x <= ev.x <= a.x + a.width and a.y <= ev.y <= a.y + a.height):
             self.hide_menu()
