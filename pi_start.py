@@ -2246,6 +2246,11 @@ class StartWindow(Gtk.Window):
         self.close_fly()
         # pick up changes made in Settings > Personalization > Start
         self.st = self.app.settings = JsonSettings("pi-start", DEFAULTS)
+        # pick up apps installed since the last time (the change monitor can miss them)
+        n = len(self.db.items)
+        self.db.reload()
+        if len(self.db.items) != n:
+            self.fill_all()
         self.at_bottom = panel_position() == "bottom"
         self._place()
         self.page = 0
